@@ -1,0 +1,43 @@
+.signPage {
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: center;
+    align-items: center;
+
+    height: 100%;
+}
+
+.iconDiv {
+    text-align: center;
+    margin-bottom: 0.4rem;
+}
+
+.icon {
+    font-size: 1.8rem !important;
+}
+
+.title {
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+.form {
+    display: flex;
+    flex-flow: column wrap;
+
+    width: 25vmax;
+    margin-bottom: 1.5vh;
+}
+
+.field {
+    margin-top: 1rem !important;
+}
+
+.submitButton {
+    margin-top: 2rem !important;
+    margin-bottom: 0.8rem !important;
+}
+
+.link {
+    text-align: right;
+}
