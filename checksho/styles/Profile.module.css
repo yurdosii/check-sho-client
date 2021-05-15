@@ -1,0 +1,58 @@
+.page {
+    display: flex;
+    flex-flow: column wrap;
+}
+
+.pageContent {
+    display: flex;
+    flex-flow: column wrap;
+    flex-grow: 1;
+    align-self: center;
+
+    width: 80vw;
+    margin-bottom: 1.5vh;
+
+    padding-top: 7vmin;
+}
+
+.title {
+    text-align: center;
+
+    font-size: 3rem;
+}
+
+.bar {
+    align-self: center !important;
+
+    width: 50% !important;
+    margin-top: 4vmin;
+    margin-bottom: 3vmin;
+}
+
+.views {
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+}
+
+.views>div {
+    width: 50% !important;
+}
+
+
+.userInfo {}
+
+.userInfoForm {
+    display: flex;
+    flex-flow: column wrap;
+}
+
+.field {
+    margin-top: 1vmin !important;
+}
+
+.formButton {
+    margin-top: 2vmin !important;
+}
+
+.userStats {}
