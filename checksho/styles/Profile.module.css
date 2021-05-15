@@ -12,7 +12,7 @@
     width: 80vw;
     margin-bottom: 1.5vh;
 
-    padding-top: 8vmin;
+    padding-top: 7vmin;
 }
 
 .title {
@@ -21,12 +21,26 @@
     font-size: 3rem;
 }
 
-.userInfo {
-    align-self: center;
-    
-    margin-top: 5vmin;
-    width: 45%;
+.bar {
+    align-self: center !important;
+
+    width: 50% !important;
+    margin-top: 4vmin;
+    margin-bottom: 3vmin;
 }
+
+.views {
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+}
+
+.views>div {
+    width: 50% !important;
+}
+
+
+.userInfo {}
 
 .userInfoForm {
     display: flex;
@@ -41,9 +55,4 @@
     margin-top: 2vmin !important;
 }
 
-.userStats {
-    align-self: center;
-    width: 45%;
-
-    margin-top: 3vmin;
-}
+.userStats {}
