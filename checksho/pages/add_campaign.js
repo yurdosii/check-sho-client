@@ -1,32 +1,29 @@
 import { Controller, useForm } from "react-hook-form";
-import React, { useEffect, useState } from 'react';
+import { INTERVALS, MARKETS } from "@/constants/campaign";
+import React, { useState } from 'react';
 
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import Header from '@/components/header';
 import InputLabel from '@material-ui/core/InputLabel';
+import MaterialTable from 'material-table'
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
-import { makeStyles } from '@material-ui/core';
-import styles from '../styles/CreateCampaign.module.css'
+import styles from '../styles/AddEditCampaign.module.css'
+import tableIcons from '@/components/tableIcons';
 import { useRouter } from 'next/router'
-import { withRouter } from 'next/router'
-
-//TODO - edit page
-//TODO - const API_URL
 
 function getMarketItems() {
-    const markets = ["Citrus", "Allo"];
-
     let items = []
-    for (let i = 0; i < markets.length; ++i) {
+    for (let i = 0; i < MARKETS.length; ++i) {
         let item = (
-            <MenuItem key={i} value={markets[i]}>
-                {markets[i]}
+            <MenuItem key={i} value={MARKETS[i]}>
+                {MARKETS[i]}
             </MenuItem>
         )
         items.push(item)
@@ -36,16 +33,10 @@ function getMarketItems() {
 }
 
 function getIntervalItems() {
-    const intervals = [
-        ["HOUR", "Every hour"],
-        ["DAY", "Every day"],
-        ["WEEK", "Every week"],
-    ];
-
     let items = []
-    for (let i = 0; i < intervals.length; ++i) {
-        let key = intervals[i][0];
-        let value = intervals[i][1];
+    for (let i = 0; i < INTERVALS.length; ++i) {
+        let key = INTERVALS[i][0];
+        let value = INTERVALS[i][1];
 
         let item = (
             <MenuItem key={i} value={key}>
@@ -58,151 +49,321 @@ function getIntervalItems() {
     return items;
 }
 
-function CreateCampaign() {
+
+function CreateCampaign(props) {
     const router = useRouter();
 
-    const { handleSubmit, control, reset } = useForm();
+    const { handleSubmit, control } = useForm(); // {mode: 'onBlur'}
+
+    // MaterialTable
+    const columns = [
+        {
+            title: 'Title',
+            field: 'title',
+            type: 'string',
+            editComponent: props => (
+                <TextField
+                    type="text"
+                    placeholder="Title"
+                    value={props.value ? props.value : ""}
+                    helperText="Set empty to be parsed from page"
+                    onChange={e => props.onChange(e.target.value)}
+                    className={styles.itemInput}
+                />
+            ),
+            headerStyle: {
+                width: "30%",
+                maxWidth: "30%",
+            },
+            cellStyle: { width: "30%", maxWidth: "30%", fontSize: "0.9rem" },
+        },
+        {
+            title: 'URL',
+            field: 'url',
+            type: 'string',
+            editComponent: props => (
+                <TextField
+                    type="text"
+                    placeholder="URL"
+                    value={props.value ? props.value : ""}
+                    helperText="Required*"
+                    onChange={e => props.onChange(e.target.value)}
+                    className={styles.itemInput}
+                />
+            ),
+            validate: rowData => Boolean(rowData.url),
+            headerStyle: {
+                width: "55%",
+                maxWidth: "55%",
+            },
+            cellStyle: { width: "55%", maxWidth: "55%", fontSize: "0.9rem" },
+        },
+        {
+            title: 'Active',
+            field: 'is_active',
+            type: 'boolean',
+            initialEditValue: true,
+            headerStyle: {
+                width: "5%",
+                maxWidth: "5%",
+            },
+            cellStyle: { width: "5%", maxWidth: "5%" },
+        },
+    ];
+
+    const [itemsData, setItemsData] = useState([]);
+
+    const editable = {
+        onRowAdd: newData =>
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    setItemsData([...itemsData, newData]);
+
+                    resolve();
+                }, 1000)
+            }),
+        onRowUpdate: (newData, oldData) =>
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    const dataUpdate = [...itemsData];
+                    const index = oldData.tableData.id;
+                    dataUpdate[index] = newData;
+                    setItemsData([...dataUpdate]);
+
+                    resolve();
+                }, 1000)
+            }),
+        onRowDelete: oldData =>
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    const dataDelete = [...itemsData];
+                    const index = oldData.tableData.id;
+                    dataDelete.splice(index, 1);
+                    setItemsData([...dataDelete]);
+
+                    resolve()
+                }, 1000)
+            }),
+    }
+
     const onSubmit = data => {
         const API_URL = "http://127.0.0.1:8000/api"
-        console.log(data)
 
+        // Create campaign
         axios.post(`${API_URL}/campaigns/`, {
             title: data.title.trim(),
-            description: data.description.trim(),
             market: data.market,
             interval: data.interval,
-            is_active: data.is_active
+            is_active: data.is_active,
+            is_telegram_campaign: data.is_telegram_campaign,
+            is_email_campaign: data.is_email_campaign,
         }, {
-            // withCredentials: true,
             xsrfCookieName: 'csrftoken',
             xsrfHeaderName: 'X-CSRFToken',
+            headers: { 'Authorization': `Bearer ${props.token}` }
         }).then(res => {
             console.log(res);
+            const createdCampaign = res.data;
+            const campaignId = createdCampaign.id
 
-            // go to /campaigns page
-            router.push("/campaigns");
+            // Create campaign items
+            axios.post(`${API_URL}/campaigns/${campaignId}/campaign-items/create_list/`,
+                itemsData,
+                {
+                    xsrfCookieName: 'csrftoken',
+                    xsrfHeaderName: 'X-CSRFToken',
+                    headers: { 'Authorization': `Bearer ${props.token}` }
+                }).then(res => {
+                    console.log(res);
+
+                    // go to /campaigns page
+                    router.push("/campaigns");
+                }).catch(error => {
+                    console.log(error);
+                });
+
+
         }).catch(error => {
             console.log(error);
-        })
+        });
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className={styles.createForm}>
-            Campaign
-            <Controller
-                name="title"
-                control={control}
-                defaultValue=""
-                rules={{
-                    required: 'Field is required',
-                    maxLength: { value: 1024, message: "Max length is 1024" }
-                }}
-                render={({ field, fieldState: { error } }) => {
-                    return <TextField {...field}
-                        label="Title"
-                        error={!!error}
-                        helperText={error ? error.message : null}
+        <div className={styles.page}>
+            <Header token={props.token} setToken={props.setToken} />
+
+            <div className={styles.pageContent}>
+
+                <div className={styles.title}>
+                    Create campaign
+                </div>
+
+                <form onSubmit={handleSubmit(onSubmit)} className={styles.createForm}>
+                    <Controller
+                        name="title"
+                        control={control}
+                        defaultValue=""
+                        rules={{
+                            required: 'Field is required',
+                            maxLength: { value: 1024, message: "Max length is 1024" }
+                        }}
+                        render={({ field, fieldState: { error } }) => {
+                            return <TextField {...field}
+                                label="Title"
+                                error={!!error}
+                                helperText={error ? error.message : null}
+                            />
+                        }}
                     />
-                }}
-            />
 
-            <Controller
-                name="description"
-                control={control}
-                defaultValue=""
-                rules={{
-                    required: false,
-                    maxLength: { value: 1024, message: "Max length is 1024" }
-                }}
-                render={({ field, fieldState: { error } }) => {
-                    return <TextField {...field}
-                        label="Description"
-                        error={!!error}
-                        helperText={error ? error.message : null}
+                    <Controller
+                        name="market"
+                        control={control}
+                        defaultValue=""
+                        rules={{ required: 'Field is required', }}
+                        render={({ field, fieldState: { error } }) => {
+                            return (
+                                <FormControl error={!!error}>
+                                    <InputLabel>
+                                        Market
+                                </InputLabel>
+                                    <Select {...field}>
+                                        {getMarketItems()}
+                                    </Select>
+                                    <FormHelperText>
+                                        {error ? error.message : null}
+                                    </FormHelperText>
+                                </FormControl>
+                            )
+                        }}
                     />
-                }}
-            />
 
-            <Controller
-                name="market"
-                control={control}
-                defaultValue=""
-                rules={{ required: 'Field is required', }}
-                render={({ field, fieldState: { error } }) => {
-                    return (
-                        <FormControl error={!!error}>
-                            <InputLabel>
-                                Market
-                            </InputLabel>
-                            <Select {...field}>
-                                {getMarketItems()}
-                            </Select>
-                            <FormHelperText>
-                                {error ? error.message : null}
-                            </FormHelperText>
-                        </FormControl>
-                    )
-                }}
-            />
+                    <Controller
+                        name="interval"
+                        control={control}
+                        defaultValue=""
+                        rules={{ required: 'Field is required', }}
+                        render={({ field, fieldState: { error } }) => {
+                            return (
+                                <FormControl error={!!error}>
+                                    <InputLabel>
+                                        Interval
+                                </InputLabel>
+                                    <Select {...field}>
+                                        {getIntervalItems()}
+                                    </Select>
+                                    <FormHelperText>
+                                        {error ? error.message : null}
+                                    </FormHelperText>
+                                </FormControl>
+                            )
+                        }}
+                    />
 
-            <Controller
-                name="interval"
-                control={control}
-                defaultValue=""
-                rules={{ required: 'Field is required', }}
-                render={({ field, fieldState: { error } }) => {
-                    return (
-                        <FormControl error={!!error}>
-                            <InputLabel>
-                                Interval
-                            </InputLabel>
-                            <Select {...field}>
-                                {getIntervalItems()}
-                            </Select>
-                            <FormHelperText>
-                                {error ? error.message : null}
-                            </FormHelperText>
-                        </FormControl>
-                    )
-                }}
-            />
-
-            <Controller
-                name="is_active"
-                control={control}
-                defaultValue={false}
-                render={({ field }) => {
-                    return (
-                        <FormControlLabel
-                            control={
-                                <Checkbox {...field}
-                                    className={styles.checkboxItem}
-                                    checked={field.value}
+                    <Controller
+                        name="is_email_campaign"
+                        control={control}
+                        defaultValue={false}
+                        render={({ field }) => {
+                            return (
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox {...field}
+                                            className={styles.checkboxItem}
+                                            checked={field.value}
+                                        />
+                                    }
+                                    label="Is email campaign"
                                 />
-                            }
-                            label="Active"
-                        />
-                    )
-                }}
-            />
+                            )
+                        }}
+                    />
 
-            <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-            >
-                Create
-            </Button>
-        </form>
+                    <Controller
+                        name="is_telegram_campaign"
+                        control={control}
+                        defaultValue={false}
+                        render={({ field }) => {
+                            return (
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox {...field}
+                                            className={styles.checkboxItem}
+                                            checked={field.value}
+                                        />
+                                    }
+                                    label="Is telegram campaign"
+                                />
+                            )
+                        }}
+                    />
+
+                    <Controller
+                        name="is_active"
+                        control={control}
+                        defaultValue={false}
+                        render={({ field }) => {
+                            return (
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox {...field}
+                                            className={styles.checkboxItem}
+                                            checked={field.value}
+                                        />
+                                    }
+                                    label="Is campaign active"
+                                />
+                            )
+                        }}
+                    />
+
+                    <div className={styles.items}>
+
+                        <MaterialTable
+                            columns={columns}
+                            data={itemsData}
+                            title="Items"
+                            icons={tableIcons}
+                            editable={editable}
+                            options={{
+                                pageSize: 3,
+                                padding: "dense"
+                            }}
+                            localization={{
+                                // header: {
+                                //     actions: 'Actions'
+                                // },
+                                body: {
+                                    emptyDataSourceMessage: 'No items were added',
+                                }
+                            }}
+                            options={{
+                                actionsCellStyle: {
+                                    width: "10%",
+                                    maxWidth: "10%",
+                                },
+                                headerStyle: {
+                                    fontWeight: "bold",
+                                },
+                                // cellStyle: { padding: '0.5em'},
+                                // headerStyle: { padding: '0.5em'},
+                            }}
+                        />
+                    </div>
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        type="submit"
+                        className={styles.submitButton}
+                    >
+                        Create
+                    </Button>
+                </form>
+
+            </div>
+        </div>
     );
 }
 
 export default CreateCampaign;
-
-
-
-{/* <InputLabel id="demo-simple-select-label">Market</InputLabel>
-                            <Select {...field}
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                            ></Select> */}
