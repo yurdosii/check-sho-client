@@ -14,6 +14,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
+import { isTokenExpired } from "@/components/useToken";
 import styles from '../../styles/AddEditCampaign.module.css'
 import tableIcons from '@/components/tableIcons';
 import { useRouter } from 'next/router'
@@ -127,11 +128,11 @@ function EditCampaign(props) {
     }, [campaign_id]);
 
     useEffect(async () => {
-        if (!props.token) { // TODO - check whether token is expired
+        if (!props.token || isTokenExpired(props.token)) {
+            props.setToken("");  // null -> "null" so empty string
             router.push('/sign_in');
         }
-
-        if (campaign_id) {
+        else if (campaign_id) {
             fetchCampaignDataAsync(props.token);
         }
     }, [campaign_id])

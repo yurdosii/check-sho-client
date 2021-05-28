@@ -15,6 +15,7 @@ import TelegramLoginButton from 'react-telegram-login';
 import TextField from '@material-ui/core/TextField';
 import { Typography } from '@material-ui/core';
 import axios from 'axios';
+import { isTokenExpired } from "@/components/useToken";
 import jwt_decode from "jwt-decode";
 import styles from '../styles/Profile.module.css';
 import { useRouter } from 'next/router';
@@ -124,14 +125,15 @@ function Profile(props) {
     }, []);
 
     useEffect(() => {
-        if (!props.token) { // TODO - check whether token is expired
+        if (!props.token || isTokenExpired(props.token)) {
+            props.setToken("");  // null -> "null" so empty string
             router.push('/sign_in');
         }
-
-        const token = props.token;
-        const decoded = jwt_decode(token);
-        fetchUserDataAsync(decoded.user_id, token);
-
+        else {
+            const token = props.token;
+            const decoded = jwt_decode(token);
+            fetchUserDataAsync(decoded.user_id, token);
+        }
     }, [fetchUserDataAsync])
 
     const handleTabChange = (event, tabValue) => {

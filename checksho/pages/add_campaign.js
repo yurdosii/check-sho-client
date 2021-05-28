@@ -1,6 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
 import { INTERVALS, MARKETS } from "@/constants/campaign";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -14,6 +14,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
+import { isTokenExpired } from "@/components/useToken";
 import styles from '../styles/AddEditCampaign.module.css'
 import tableIcons from '@/components/tableIcons';
 import { useRouter } from 'next/router'
@@ -54,6 +55,13 @@ function CreateCampaign(props) {
     const router = useRouter();
 
     const { handleSubmit, control } = useForm(); // {mode: 'onBlur'}
+
+    useEffect(() => {
+        if (!props.token || isTokenExpired(props.token)) {
+            props.setToken("");  // null -> "null" so empty string
+            router.push('/sign_in');
+        }
+    })
 
     // MaterialTable
     const columns = [
