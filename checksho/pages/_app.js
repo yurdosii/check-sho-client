@@ -1,15 +1,18 @@
 import '../styles/globals.css'
 
-import useToken from 'components/useToken';
+import { SnackbarProvider } from 'notistack';
 
 function MyApp({ Component, pageProps }) {
-  const { token, setToken } = useToken();
 
-  return (
-    <div className="app">
-      <Component {...pageProps} token={token} setToken={setToken}/>
-    </div>
-  )
+    return (
+        <SnackbarProvider maxSnack={3}>
+            <div className="app">
+                <Component {...pageProps} />
+            </div>
+        </SnackbarProvider>
+    )
 }
 
 export default MyApp
+
+// npm run dev

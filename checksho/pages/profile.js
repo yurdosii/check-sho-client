@@ -6,6 +6,7 @@ import { Bar } from 'react-chartjs-2';
 import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
 import Header from '@/components/header';
+import Slide from '@material-ui/core/Slide';
 import SwipeableViews from 'react-swipeable-views';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
@@ -17,6 +18,7 @@ import axios from 'axios';
 import jwt_decode from "jwt-decode";
 import styles from '../styles/Profile.module.css';
 import { useRouter } from 'next/router';
+import { useSnackbar } from 'notistack';
 import { useTheme } from '@material-ui/core/styles';
 
 function GetChartData(statsData) {
@@ -92,6 +94,8 @@ function Profile(props) {
     const [telegramUserData, setTelegramUserData] = useState(null);
     const [tabValue, setTabValue] = useState(0);
 
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
     const { handleSubmit, control, setValue } = useForm();
 
     const fetchUserDataAsync = useCallback(async (id, token) => {
@@ -144,9 +148,7 @@ function Profile(props) {
         const user_id = decoded.user_id;
 
         // Link TelegramUser to User
-        axios.post(`${API_URL}/users/${user_id}/link_telegram/`, {
-            response
-        }, {
+        axios.post(`${API_URL}/users/${user_id}/link_telegram/`, response, {
             xsrfCookieName: 'csrftoken',
             xsrfHeaderName: 'X-CSRFToken',
             headers: { 'Authorization': `Bearer ${props.token}` }
@@ -157,18 +159,48 @@ function Profile(props) {
             // set data
             setTelegramUserData(responseUserData.telegram_user)
 
+            // TODO - snackbar
+
         }).catch(error => {
             console.log(error);
         });
-
-        console.log(response);
     }
 
-    const onSubmit = data => console.log(data);
+    const onSubmit = data => {
+        const API_URL = "http://127.0.0.1:8000/api"
+        const token = props.token;
+        const decoded = jwt_decode(token);
+        const user_id = decoded.user_id;
+
+        // Update user
+        axios.patch(`${API_URL}/users/${user_id}/`, data, {
+            xsrfCookieName: 'csrftoken',
+            xsrfHeaderName: 'X-CSRFToken',
+            headers: { 'Authorization': `Bearer ${props.token}` }
+        }).then(res => {
+            console.log(res);
+
+            // snackbar
+            enqueueSnackbar("User saved", {
+                variant: "success",
+                anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                },
+                TransitionComponent: Slide,
+                preventDuplicate: true,
+                autoHideDuration: 1000
+            });
+
+        }).catch(error => {
+            console.log(error);
+        });
+    };
 
     console.log("Rerender")
     console.log(userData);
     console.log(statsData);
+    console.log();
 
     return (
         <div className={styles.page}>
