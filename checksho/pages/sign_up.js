@@ -118,7 +118,7 @@ function SignUp(props) {
                     type="submit"
                     className={styles.submitButton}
                 >
-                    Sign in
+                    Sign up
                 </Button>
                 <Link href={`/sign_in/`} className={styles.link}>
                     Already have an account? Sign in
