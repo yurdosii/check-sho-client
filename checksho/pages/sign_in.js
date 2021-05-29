@@ -26,7 +26,6 @@ function SignIn(props) {
     const { handleSubmit, control, reset } = useForm();
     const onSubmit = data => {
         const API_URL = "http://127.0.0.1:8000/api"
-        console.log(data)
 
         axios.post(`${API_URL}/auth/login/`, {
             username: data.username,
@@ -39,6 +38,9 @@ function SignIn(props) {
 
             const token = res.data.access_token;
             props.setToken(token);
+
+            const username = res.data.user.username;
+            props.setNameToDisplay(username);
         }).catch(error => {
             console.log(error);
         })

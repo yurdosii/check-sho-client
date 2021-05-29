@@ -66,7 +66,7 @@ export default function MenuAppBar(props) {
                                 <div className={styles.accountDiv}>
                                     <AccountCircle />
                                     <div className={styles.accountText}>
-                                        Yura
+                                        {props.nameToDisplay ? props.nameToDisplay : ""}
                                     </div>
                                 </div>
                             </IconButton>

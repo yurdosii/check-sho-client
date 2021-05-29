@@ -25,7 +25,6 @@ function SignUp(props) {
     // const onSubmit = data => console.log(data);
     const onSubmit = data => {
         const API_URL = "http://127.0.0.1:8000/api"
-        console.log(data)
 
         axios.post(`${API_URL}/auth/registration/`, {
             username: data.username,
@@ -39,6 +38,9 @@ function SignUp(props) {
 
             const token = res.data.access_token;
             props.setToken(token);
+
+            const username = res.data.user.username;
+            props.setNameToDisplay(username);
         }).catch(error => {
             console.log(error);
         })

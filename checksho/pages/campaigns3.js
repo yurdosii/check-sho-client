@@ -107,10 +107,32 @@ function Campaigns(props) {
             render: rowData => rowData.items.length,
             customSort: (a, b) => a.items.length - b.items.length
         },
-        { title: 'Created at', field: 'created_at', type: 'datetime' },
-        { title: 'Updated at', field: 'updated_at', type: 'datetime' },
-        { title: 'Last run', field: 'last_run', type: 'datetime', emptyValue: "Wasn't run" },
-        { title: 'Next run', field: 'next_run', type: 'datetime', emptyValue: "Undefined" },
+        {
+            title: 'Created at',
+            field: 'created_at',
+            type: 'datetime',
+            cellStyle: { fontSize: "0.95rem" },
+        },
+        {
+            title: 'Updated at',
+            field: 'updated_at',
+            type: 'datetime',
+            cellStyle: { fontSize: "0.95rem" },
+        },
+        {
+            title: 'Last run',
+            field: 'last_run',
+            type: 'datetime',
+            emptyValue: "Wasn't run",
+            cellStyle: { fontSize: "0.95rem" },
+        },
+        {
+            title: 'Next run',
+            field: 'next_run',
+            type: 'datetime',
+            emptyValue: "Undefined",
+            cellStyle: { fontSize: "0.95rem" },
+        },
     ]);
 
     const [columnsItems, setColumnsItems] = useState([
@@ -192,7 +214,7 @@ function Campaigns(props) {
 
     return (
         <div className={styles.page}>
-            <Header token={props.token} setToken={props.setToken} />
+            <Header token={props.token} setToken={props.setToken} nameToDisplay={props.nameToDisplay} />
 
             <div className={styles.pageContent}>
                 <Link href={`/add_campaign`} className={styles.addCampaignButton}>

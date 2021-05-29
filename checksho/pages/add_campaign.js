@@ -204,7 +204,7 @@ function CreateCampaign(props) {
 
     return (
         <div className={styles.page}>
-            <Header token={props.token} setToken={props.setToken} />
+            <Header token={props.token} setToken={props.setToken} nameToDisplay={props.nameToDisplay} />
 
             <div className={styles.pageContent}>
 
