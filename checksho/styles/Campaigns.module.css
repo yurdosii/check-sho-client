@@ -30,22 +30,3 @@
     width: 80vw;
     margin-bottom: 1.5vh;
 }
-
-.typeList {
-    display: flex;
-}
-
-.checkboxItem {
-    color: #309f30 !important;
-    padding: 0 !important;
-}
-
-.tableRowRoot > * {
-    border-bottom: none !important;
-}
-
-.items {
-    margin-top: 1vmin;
-    display: flex;
-    flex-flow: column wrap;
-}
