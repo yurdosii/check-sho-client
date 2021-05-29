@@ -63,7 +63,7 @@ function EditCampaign(props) {
         // console.log(data);
         // console.log(itemsData);
 
-        axios.put(`${API_URL}/campaigns/${campaign_id}/`, {
+        axios.patch(`${API_URL}/campaigns/${campaign_id}/`, {
             title: data.title.trim(),
             market: data.market,
             interval: data.interval,
@@ -77,7 +77,7 @@ function EditCampaign(props) {
         }).then(res => {
             console.log(res);
 
-            axios.put(`${API_URL}/campaigns/${campaign_id}/campaign-items/update_list/`,
+            axios.patch(`${API_URL}/campaigns/${campaign_id}/campaign-items/update_list/`,
                 itemsData,
                 {
                     xsrfCookieName: 'csrftoken',

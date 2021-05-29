@@ -1,9 +1,9 @@
+import { INTERVALS_RENDER, MARKETS_LINKS } from "@/constants/campaign";
 import React, { useEffect, useState } from 'react';
 
 import Button from '@material-ui/core/Button';
 import Header from '@/components/header';
 import Link from 'next/link'
-import { MARKETS_LINKS } from "@/constants/campaign";
 import MaterialTable from 'material-table'
 import Slide from '@material-ui/core/Slide';
 import axios from 'axios';
@@ -89,6 +89,7 @@ function Campaigns(props) {
         {
             title: 'Interval',
             field: 'interval',
+            render: rowData => INTERVALS_RENDER[rowData.interval]
         },
         {
             title: 'Type',

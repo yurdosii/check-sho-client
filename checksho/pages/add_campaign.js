@@ -15,6 +15,7 @@ import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
 import { isTokenExpired } from "@/components/useToken";
+import jwt_decode from "jwt-decode";
 import styles from '../styles/AddEditCampaign.module.css'
 import tableIcons from '@/components/tableIcons';
 import { useRouter } from 'next/router'
@@ -157,6 +158,10 @@ function CreateCampaign(props) {
     const onSubmit = data => {
         const API_URL = "http://127.0.0.1:8000/api"
 
+        const token = props.token;
+        const decoded = jwt_decode(token);
+        const owner_id = decoded.user_id;
+
         // Create campaign
         axios.post(`${API_URL}/campaigns/`, {
             title: data.title.trim(),
@@ -165,6 +170,7 @@ function CreateCampaign(props) {
             is_active: data.is_active,
             is_telegram_campaign: data.is_telegram_campaign,
             is_email_campaign: data.is_email_campaign,
+            owner: owner_id,
         }, {
             xsrfCookieName: 'csrftoken',
             xsrfHeaderName: 'X-CSRFToken',
