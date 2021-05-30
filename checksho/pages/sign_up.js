@@ -9,7 +9,6 @@ import axios from 'axios';
 import styles from '../styles/Auth.module.css'
 import { useRouter } from 'next/router'
 
-//TODO - const API_URL
 //TODO - validation password1 == password2
 
 function SignUp(props) {

@@ -11,9 +11,6 @@ import styles from '../styles/Auth.module.css'
 import { useRouter } from 'next/router'
 import useToken from 'components/useToken';
 
-//TODO - const API_URL
-
-
 function SignIn(props) {
     const router = useRouter();
 

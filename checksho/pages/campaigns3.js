@@ -32,6 +32,22 @@ function Campaigns(props) {
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
+    const getCampaigns = token => {
+        const API_URL = "http://127.0.0.1:8000/api"
+
+        axios.get(
+            `${API_URL}/campaigns/?expand=market_details&expand=items`,
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        ).then(res => {
+            console.log(res)
+
+            const campaigns = res.data;
+            setCampaigns(campaigns);
+        }).catch(error => {
+            console.log(error)
+        })
+    }
+
     useEffect(() => {
         if (!props.token || isTokenExpired(props.token)) {
             // Token expired or doesn't exist
@@ -39,19 +55,8 @@ function Campaigns(props) {
             router.push('/sign_in');
         } else {
             const token = props.token;
-            const API_URL = "http://127.0.0.1:8000/api"
 
-            axios.get(
-                `${API_URL}/campaigns/?expand=market_details&expand=items`,
-                { headers: { 'Authorization': `Bearer ${token}` } }
-            ).then(res => {
-                console.log(res)
-
-                const campaigns = res.data;
-                setCampaigns(campaigns);
-            }).catch(error => {
-                console.log(error)
-            })
+            getCampaigns(token);
         }
     }, [router]) // infinite loop of requests without this '[router]'
 
@@ -68,10 +73,73 @@ function Campaigns(props) {
         })
     }
 
+    const showCampaignRunInfoSnackbar = campaignData => {
+        // snackbar
+        enqueueSnackbar(`Campaign '${campaignData.title}' started running`, {
+            variant: "info",
+            anchorOrigin: {
+                vertical: 'bottom',
+                horizontal: 'right',
+            },
+            TransitionComponent: Slide,
+            preventDuplicate: true,
+            autoHideDuration: 1500
+        });
+    }
+
+    const runCampaign = id => {
+        const token = props.token;
+        const API_URL = "http://127.0.0.1:8000/api";
+
+        // /run_campaign endpoint
+        axios.post(
+            `${API_URL}/campaigns/${id}/run_campaign/`,
+            {},
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        ).then(res => {
+            console.log(res)
+
+            // snackbar
+            enqueueSnackbar(`${res.data.notification}`, {
+                variant: "success",
+                anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                },
+                TransitionComponent: Slide,
+                preventDuplicate: true,
+                autoHideDuration: 3000
+            });
+
+            // update campaigns
+            getCampaigns(token);
+
+        }).catch(error => {
+            console.log(error);
+
+            // snackbar
+            if (error.response && error.response.data) {
+                setTimeout(() => {
+                    enqueueSnackbar(`Running error: ${error.response.data.error}`, {
+                        variant: "error",
+                        anchorOrigin: {
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        },
+                        TransitionComponent: Slide,
+                        preventDuplicate: true,
+                        autoHideDuration: 2500,
+                    });
+                }, 1500);
+            }
+        })
+    }
+
     const [columns, setColumns] = useState([
         {
             title: 'Title',
             field: 'title',
+            cellStyle: { fontSize: "0.95rem" },
         },
         {
             title: 'Market',
@@ -84,54 +152,60 @@ function Campaigns(props) {
                         </a>
                     </Link>
                 )
-            }
+            },
+            cellStyle: { fontSize: "0.95rem" },
         },
         {
             title: 'Interval',
             field: 'interval',
-            render: rowData => INTERVALS_RENDER[rowData.interval]
+            render: rowData => INTERVALS_RENDER[rowData.interval],
+            cellStyle: { fontSize: "0.95rem" },
         },
         {
             title: 'Type',
-            render: getType
+            render: getType,
+            cellStyle: { fontSize: "0.95rem" },
         },
         {
             title: 'Active',
             field: 'is_active',
-            type: 'boolean'
+            type: 'boolean',
+            cellStyle: { fontSize: "0.95rem" },
         },
         {
             title: 'Items number',
             type: 'numeric',
             align: 'left',
             render: rowData => rowData.items.length,
-            customSort: (a, b) => a.items.length - b.items.length
+            customSort: (a, b) => a.items.length - b.items.length,
+            headerStyle: { width: "5%", maxWidth: "5%" },
+            cellStyle: { fontSize: "0.95rem", width: "5%", maxWidth: "5%" },
         },
         {
             title: 'Created at',
             field: 'created_at',
             type: 'datetime',
-            cellStyle: { fontSize: "0.95rem" },
+            cellStyle: { fontSize: "0.9rem" },
         },
         {
             title: 'Updated at',
             field: 'updated_at',
             type: 'datetime',
-            cellStyle: { fontSize: "0.95rem" },
+            cellStyle: { fontSize: "0.9rem" },
         },
         {
             title: 'Last run',
             field: 'last_run',
             type: 'datetime',
             emptyValue: "Wasn't run",
-            cellStyle: { fontSize: "0.95rem" },
+            cellStyle: { fontSize: "0.9rem" },
         },
         {
             title: 'Next run',
             field: 'next_run',
             type: 'datetime',
             emptyValue: "Undefined",
-            cellStyle: { fontSize: "0.95rem" },
+            cellStyle: { fontSize: "0.9rem" },
         },
     ]);
 
@@ -251,7 +325,10 @@ function Campaigns(props) {
                             // TODO - this
                             icon: tableIcons.Run,
                             tooltip: 'Run campaign',
-                            onClick: (event, rowData) => alert("Run campaign Yura")
+                            onClick: (event, rowData) => {
+                                showCampaignRunInfoSnackbar(rowData);
+                                runCampaign(rowData.id);
+                            }
                         },
                         {
                             icon: tableIcons.Edit,
