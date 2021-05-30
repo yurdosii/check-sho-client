@@ -137,7 +137,7 @@ function EditCampaign(props) {
         }
     }, [campaign_id])
 
-    const [columns, setColumns] = useState([
+    const columns = [
         {
             title: 'Title',
             field: 'title',
@@ -152,10 +152,7 @@ function EditCampaign(props) {
                     className={styles.itemInput}
                 />
             ),
-            headerStyle: {
-                width: "30%",
-                maxWidth: "30%",
-            },
+            headerStyle: { width: "30%", maxWidth: "30%", fontSize: "0.9rem" },
             cellStyle: { width: "30%", maxWidth: "30%", fontSize: "0.9rem" },
         },
         {
@@ -173,10 +170,7 @@ function EditCampaign(props) {
                 />
             ),
             validate: rowData => Boolean(rowData.url),
-            headerStyle: {
-                width: "55%",
-                maxWidth: "55%",
-            },
+            headerStyle: { width: "55%", maxWidth: "55%", fontSize: "0.9rem" },
             cellStyle: { width: "55%", maxWidth: "55%", fontSize: "0.9rem" },
         },
         {
@@ -184,13 +178,26 @@ function EditCampaign(props) {
             field: 'is_active',
             type: 'boolean',
             initialEditValue: true,
-            headerStyle: {
-                width: "5%",
-                maxWidth: "5%",
-            },
-            cellStyle: { width: "5%", maxWidth: "5%" },
+            headerStyle: { width: "3%", maxWidth: "3%", fontSize: "0.9rem" },
+            cellStyle: { width: "3%", maxWidth: "3%", fontSize: "0.9rem" },
         },
-    ]);
+        {
+            title: 'Notify sale',
+            field: 'is_notify_sale',
+            type: 'boolean',
+            initialEditValue: false,
+            headerStyle: { width: "3%", maxWidth: "3%", fontSize: "0.85rem" },
+            cellStyle: { width: "3%", maxWidth: "3%", fontSize: "0.85rem" },
+        },
+        {
+            title: 'Notify availability',
+            field: 'is_notify_available',
+            type: 'boolean',
+            initialEditValue: false,
+            headerStyle: { width: "3%", maxWidth: "3%", fontSize: "0.85rem" },
+            cellStyle: { width: "3%", maxWidth: "3%", fontSize: "0.85rem" },
+        },
+    ];
 
     const [itemsData, setItemsData] = useState([]);
 
@@ -251,6 +258,7 @@ function EditCampaign(props) {
                                 label="Title"
                                 error={!!error}
                                 helperText={error ? error.message : null}
+                                className={styles.field}
                             />
                         }}
                     />
@@ -262,7 +270,7 @@ function EditCampaign(props) {
                         rules={{ required: 'Field is required', }}
                         render={({ field, fieldState: { error } }) => {
                             return (
-                                <FormControl error={!!error}>
+                                <FormControl error={!!error} className={styles.field}>
                                     <InputLabel>
                                         Market
                                 </InputLabel>
@@ -284,7 +292,7 @@ function EditCampaign(props) {
                         rules={{ required: 'Field is required', }}
                         render={({ field, fieldState: { error } }) => {
                             return (
-                                <FormControl error={!!error}>
+                                <FormControl error={!!error} className={styles.field}>
                                     <InputLabel>
                                         Interval
                                 </InputLabel>

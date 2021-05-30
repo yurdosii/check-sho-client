@@ -8,7 +8,7 @@
 .pageContent {
     align-self: center;
 
-    width: 45vw;
+    width: 48vw;
     margin-top: 3vmin;
 }
 
@@ -25,6 +25,10 @@
 
     /* width: 60vw; */
     margin-bottom: 1.5vh;
+}
+
+.field {
+    margin-top: 0.5vmin !important;
 }
 
 .checkboxItem {

@@ -227,11 +227,8 @@ function Campaigns(props) {
         {
             title: 'URL',
             field: 'url',
-            headerStyle: {
-                width: "60%",
-                maxWidth: "60%",
-            },
-            cellStyle: { width: "60%", maxWidth: "60%" },
+            headerStyle: { width: "50%", maxWidth: "50%" },
+            cellStyle: { width: "50%", maxWidth: "50%" },
             render: rowData => {
                 return (
                     <Link href={rowData.url}>
@@ -246,11 +243,24 @@ function Campaigns(props) {
             title: 'Active',
             field: 'is_active',
             type: 'boolean',
-            headerStyle: {
-                width: "10%",
-                maxWidth: "10%",
-            },
-            cellStyle: { width: "10%", maxWidth: "10%" },
+            headerStyle: { width: "7%", maxWidth: "7%" },
+            cellStyle: { width: "7%", maxWidth: "7%" },
+        },
+        {
+            title: 'Notify sale',
+            field: 'is_notify_sale',
+            type: 'boolean',
+            initialEditValue: false,
+            headerStyle: { width: "7%", maxWidth: "7%" },
+            cellStyle: { width: "7%", maxWidth: "7%" },
+        },
+        {
+            title: 'Notify availability',
+            field: 'is_notify_available',
+            type: 'boolean',
+            initialEditValue: false,
+            headerStyle: { width: "7%", maxWidth: "7%" },
+            cellStyle: { width: "7%", maxWidth: "7%" },
         },
     ]);
 

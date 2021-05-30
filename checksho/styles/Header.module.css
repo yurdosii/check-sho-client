@@ -2,6 +2,11 @@
     flex-grow: 1;
 }
 
+.root header {
+    background-color: #435099 !important;
+}
+
+.telegramBotLink,
 .link {
     font-size: 1.25rem;
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
@@ -10,6 +15,14 @@
     letter-spacing: 0.0075em;
 
     margin-right: 1rem;
+}
+
+.telegramBotLink {
+    margin-left: 1.5rem;
+}
+
+.telegramBotLink:hover {
+    color: #b5b8e1;
 }
 
 .sepDiv {
