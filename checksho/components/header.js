@@ -51,6 +51,9 @@ export default function MenuAppBar(props) {
                     <Link href={`/`}>
                         <a className={styles.link}>Checksho</a>
                     </Link>
+                    <Link href={`https://t.me/checksho_bot`}>
+                        <a className={styles.telegramBotLink}>Telegram-bot</a>
+                    </Link>
                     <div className={styles.sepDiv}>
 
                     </div>
