@@ -191,7 +191,7 @@ function CreateCampaign(props) {
                     console.log(res);
 
                     // go to /campaigns page
-                    router.push("/campaigns");
+                    router.push("/");
                 }).catch(error => {
                     console.log(error);
                 });

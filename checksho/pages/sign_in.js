@@ -16,7 +16,7 @@ function SignIn(props) {
 
     useEffect(() => {
         if (props.token) {
-            router.push('/'); // TODO - campaigns
+            router.push('/');
         }
     })
 
