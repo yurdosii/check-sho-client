@@ -1,6 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
 import { INTERVALS, MARKETS } from "@/constants/campaign";
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -15,8 +15,7 @@ import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
 import { isTokenExpired } from "@/components/useToken";
-import jwt_decode from "jwt-decode";
-import styles from '../styles/AddEditCampaign.module.css'
+import styles from '../../styles/AddEditCampaign.module.css'
 import tableIcons from '@/components/tableIcons';
 import { useRouter } from 'next/router'
 
@@ -52,19 +51,92 @@ function getIntervalItems() {
 }
 
 
-function CreateCampaign(props) {
+function EditCampaign(props) {
     const router = useRouter();
+    const campaign_id = router.query.id; // ? router.query.id : 0;
 
-    const { handleSubmit, control } = useForm(); // {mode: 'onBlur'}
+    const { handleSubmit, control, reset } = useForm(); // {mode: 'onBlur'}
+    // const onSubmit = data => console.log(data);
 
-    useEffect(() => {
+    const onSubmit = data => {
+        const API_URL = "http://127.0.0.1:8000/api"
+        // console.log(data);
+        // console.log(itemsData);
+
+        axios.patch(`${API_URL}/campaigns/${campaign_id}/`, {
+            title: data.title.trim(),
+            market: data.market,
+            interval: data.interval,
+            is_active: data.is_active,
+            is_telegram_campaign: data.is_telegram_campaign,
+            is_email_campaign: data.is_email_campaign,
+        }, {
+            xsrfCookieName: 'csrftoken',
+            xsrfHeaderName: 'X-CSRFToken',
+            headers: { 'Authorization': `Bearer ${props.token}` }
+        }).then(res => {
+            console.log(res);
+
+            axios.patch(`${API_URL}/campaigns/${campaign_id}/campaign-items/update_list/`,
+                itemsData,
+                {
+                    xsrfCookieName: 'csrftoken',
+                    xsrfHeaderName: 'X-CSRFToken',
+                    headers: { 'Authorization': `Bearer ${props.token}` }
+                }).then(res => {
+                    console.log(res);
+
+                    // go to /campaigns page
+                    router.push("/");
+                }).catch(error => {
+                    console.log(error);
+                });
+
+
+        }).catch(error => {
+            console.log(error);
+        });
+    }
+
+    const fetchCampaignDataAsync = useCallback(async (token) => {
+        const API_URL = "http://127.0.0.1:8000/api"
+
+        const responseUserData = await fetch(
+            `${API_URL}/campaigns/${campaign_id}/?expand=items`,
+            {
+                headers: new Headers({
+                    'Authorization': `Bearer ${token}`
+                })
+            }
+        ).then(res => res.json());
+
+        // console.log("FETCH")
+        // console.log(responseUserData);
+        // console.log("")
+
+        // set controllers (campaign data)
+        reset(responseUserData);
+
+        // set items data
+        setItemsData(responseUserData.items);
+
+        // set form default values
+        // setValue('username', responseUserData.username)
+        // setValue('email', responseUserData.email)
+        // setValue('first_name', responseUserData.first_name)
+        // setValue('last_name', responseUserData.last_name)
+    }, [campaign_id]);
+
+    useEffect(async () => {
         if (!props.token || isTokenExpired(props.token)) {
             props.setToken("");  // null -> "null" so empty string
             router.push('/sign_in');
         }
-    })
+        else if (campaign_id) {
+            fetchCampaignDataAsync(props.token);
+        }
+    }, [campaign_id])
 
-    // MaterialTable
     const columns = [
         {
             title: 'Title',
@@ -162,53 +234,6 @@ function CreateCampaign(props) {
             }),
     }
 
-    const onSubmit = data => {
-        const API_URL = "http://127.0.0.1:8000/api"
-
-        const token = props.token;
-        const decoded = jwt_decode(token);
-        const owner_id = decoded.user_id;
-
-        // Create campaign
-        axios.post(`${API_URL}/campaigns/`, {
-            title: data.title.trim(),
-            market: data.market,
-            interval: data.interval,
-            is_active: data.is_active,
-            is_telegram_campaign: data.is_telegram_campaign,
-            is_email_campaign: data.is_email_campaign,
-            owner: owner_id,
-        }, {
-            xsrfCookieName: 'csrftoken',
-            xsrfHeaderName: 'X-CSRFToken',
-            headers: { 'Authorization': `Bearer ${props.token}` }
-        }).then(res => {
-            console.log(res);
-            const createdCampaign = res.data;
-            const campaignId = createdCampaign.id
-
-            // Create campaign items
-            axios.post(`${API_URL}/campaigns/${campaignId}/campaign-items/create_list/`,
-                itemsData,
-                {
-                    xsrfCookieName: 'csrftoken',
-                    xsrfHeaderName: 'X-CSRFToken',
-                    headers: { 'Authorization': `Bearer ${props.token}` }
-                }).then(res => {
-                    console.log(res);
-
-                    // go to /campaigns page
-                    router.push("/");
-                }).catch(error => {
-                    console.log(error);
-                });
-
-
-        }).catch(error => {
-            console.log(error);
-        });
-    }
-
     return (
         <div className={styles.page}>
             <Header token={props.token} setToken={props.setToken} nameToDisplay={props.nameToDisplay} />
@@ -216,7 +241,7 @@ function CreateCampaign(props) {
             <div className={styles.pageContent}>
 
                 <div className={styles.title}>
-                    Create campaign
+                    Edit campaign
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className={styles.createForm}>
@@ -248,7 +273,7 @@ function CreateCampaign(props) {
                                 <FormControl error={!!error} className={styles.field}>
                                     <InputLabel>
                                         Market
-                                    </InputLabel>
+                                </InputLabel>
                                     <Select {...field}>
                                         {getMarketItems()}
                                     </Select>
@@ -379,13 +404,15 @@ function CreateCampaign(props) {
                         type="submit"
                         className={styles.submitButton}
                     >
-                        Create
+                        Save
                     </Button>
                 </form>
 
             </div>
         </div>
     );
+
 }
 
-export default CreateCampaign;
+
+export default EditCampaign;

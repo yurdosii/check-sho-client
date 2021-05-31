@@ -56,3 +56,18 @@
 }
 
 .userStats {}
+
+.telegramChip {
+    margin-top: 1vmin !important;
+    justify-content: left !important;
+    width: 35%;
+
+    color: #fff !important;
+    background-color: #54a9eb !important;
+
+    font-weight: 500;
+}
+
+.telegramButton {
+    margin-top: 1vmin;
+}

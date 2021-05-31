@@ -9,15 +9,12 @@ import axios from 'axios';
 import styles from '../styles/Auth.module.css'
 import { useRouter } from 'next/router'
 
-//TODO - const API_URL
-//TODO - validation password1 == password2
-
 function SignUp(props) {
     const router = useRouter();
 
     useEffect(() => {
         if (props.token) {
-            router.push('/');  // TODO - campaigns
+            router.push('/');
         }
     })
 
@@ -25,7 +22,6 @@ function SignUp(props) {
     // const onSubmit = data => console.log(data);
     const onSubmit = data => {
         const API_URL = "http://127.0.0.1:8000/api"
-        console.log(data)
 
         axios.post(`${API_URL}/auth/registration/`, {
             username: data.username,
@@ -39,6 +35,9 @@ function SignUp(props) {
 
             const token = res.data.access_token;
             props.setToken(token);
+
+            const username = res.data.user.username;
+            props.setNameToDisplay(username);
         }).catch(error => {
             console.log(error);
         })
@@ -60,7 +59,6 @@ function SignUp(props) {
                     rules={{
                         required: 'Field is required',
                         // maxLength: { value: 30, message: "Max length is 30" }
-                        // TODO - кастомний, username = 30, email_address = 254
                     }}
                     render={({ field, fieldState: { error } }) => {
                         return <TextField {...field}
@@ -118,7 +116,7 @@ function SignUp(props) {
                     type="submit"
                     className={styles.submitButton}
                 >
-                    Sign in
+                    Sign up
                 </Button>
                 <Link href={`/sign_in/`} className={styles.link}>
                     Already have an account? Sign in

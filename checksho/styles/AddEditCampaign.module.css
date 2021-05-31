@@ -1,0 +1,55 @@
+.page {
+    display: flex;
+    flex-flow: column wrap;
+
+    width: 100vw;
+}
+
+.pageContent {
+    align-self: center;
+
+    width: 48vw;
+    margin-top: 3vmin;
+}
+
+.title {
+    text-align: center;
+    font-size: 2rem;
+}
+
+.createForm {
+    display: flex;
+    flex-flow: column wrap;
+    flex-grow: 1;
+    align-self: center;
+
+    /* width: 60vw; */
+    margin-bottom: 1.5vh;
+}
+
+.field {
+    margin-top: 0.5vmin !important;
+}
+
+.checkboxItem {
+    color: #303f9f !important;
+}
+
+/* sibling */
+.checkboxItem+span {
+    padding-top: 5px;
+}
+
+.items {
+    margin-top: 1vmin;
+    display: flex;
+    flex-flow: column wrap;
+}
+
+.itemInput {
+    width: 100%;
+}
+
+.submitButton {
+    margin-top: 2vmin !important;
+}

@@ -4,15 +4,22 @@ import React, { useCallback, useEffect, useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import { Bar } from 'react-chartjs-2';
 import Button from '@material-ui/core/Button';
+import Chip from '@material-ui/core/Chip';
 import Header from '@/components/header';
+import Slide from '@material-ui/core/Slide';
 import SwipeableViews from 'react-swipeable-views';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
+import TelegramIcon from '@material-ui/icons/Telegram';
+import TelegramLoginButton from 'react-telegram-login';
 import TextField from '@material-ui/core/TextField';
 import { Typography } from '@material-ui/core';
+import axios from 'axios';
+import { isTokenExpired } from "@/components/useToken";
 import jwt_decode from "jwt-decode";
 import styles from '../styles/Profile.module.css';
 import { useRouter } from 'next/router';
+import { useSnackbar } from 'notistack';
 import { useTheme } from '@material-ui/core/styles';
 
 function GetChartData(statsData) {
@@ -85,7 +92,10 @@ function Profile(props) {
 
     const [statsData, setStatsData] = useState({});
     const [userData, setUserData] = useState(null);
+    const [telegramUserData, setTelegramUserData] = useState(null);
     const [tabValue, setTabValue] = useState(0);
+
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     const { handleSubmit, control, setValue } = useForm();
 
@@ -105,6 +115,7 @@ function Profile(props) {
         // set data
         setUserData(responseUserData);
         setStatsData(responseUserData.profileStatistics);
+        setTelegramUserData(responseUserData.telegram_user)
 
         // set form default values
         setValue('username', responseUserData.username)
@@ -114,30 +125,88 @@ function Profile(props) {
     }, []);
 
     useEffect(() => {
-        if (!props.token) { // TODO - check whether token is expired
+        if (!props.token || isTokenExpired(props.token)) {
+            props.setToken("");  // null -> "null" so empty string
             router.push('/sign_in');
         }
-
-        const token = props.token;
-        const decoded = jwt_decode(token);
-        fetchUserDataAsync(decoded.user_id, token);
-
+        else {
+            const token = props.token;
+            const decoded = jwt_decode(token);
+            fetchUserDataAsync(decoded.user_id, token);
+        }
     }, [fetchUserDataAsync])
 
     const handleTabChange = (event, tabValue) => {
         setTabValue(tabValue);
     };
 
-    // TODO - submit (snackbar on success save)
-    const onSubmit = data => console.log(data);
+    const handleTelegramResponse = response => {
+        // telegram login callback
+        // send POST request to /link_telegram/ and link telegram user to user
+
+        const API_URL = "http://127.0.0.1:8000/api"
+        const token = props.token;
+        const decoded = jwt_decode(token);
+        const user_id = decoded.user_id;
+
+        // Link TelegramUser to User
+        axios.post(`${API_URL}/users/${user_id}/link_telegram/`, response, {
+            xsrfCookieName: 'csrftoken',
+            xsrfHeaderName: 'X-CSRFToken',
+            headers: { 'Authorization': `Bearer ${props.token}` }
+        }).then(res => {
+            console.log(res);
+            const responseUserData = res.data;
+
+            // set data
+            setTelegramUserData(responseUserData.telegram_user)
+
+            // TODO - snackbar
+
+        }).catch(error => {
+            console.log(error);
+        });
+    }
+
+    const onSubmit = data => {
+        const API_URL = "http://127.0.0.1:8000/api"
+        const token = props.token;
+        const decoded = jwt_decode(token);
+        const user_id = decoded.user_id;
+
+        // Update user
+        axios.patch(`${API_URL}/users/${user_id}/`, data, {
+            xsrfCookieName: 'csrftoken',
+            xsrfHeaderName: 'X-CSRFToken',
+            headers: { 'Authorization': `Bearer ${props.token}` }
+        }).then(res => {
+            console.log(res);
+
+            // snackbar
+            enqueueSnackbar("User saved", {
+                variant: "success",
+                anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                },
+                TransitionComponent: Slide,
+                preventDuplicate: true,
+                autoHideDuration: 1000
+            });
+
+        }).catch(error => {
+            console.log(error);
+        });
+    };
 
     console.log("Rerender")
     console.log(userData);
     console.log(statsData);
+    console.log();
 
     return (
         <div className={styles.page}>
-            <Header token={props.token} setToken={props.setToken} />
+            <Header token={props.token} setToken={props.setToken} nameToDisplay={props.nameToDisplay} />
 
             <div className={styles.pageContent}>
 
@@ -243,6 +312,23 @@ function Profile(props) {
                                         />
                                     }}
                                 />
+
+                                {telegramUserData ?
+                                    <Chip
+                                        icon={<TelegramIcon />}
+                                        label={
+                                            `Telegram is connected (${telegramUserData.displayName})`
+                                        }
+                                        color="primary"
+                                        className={styles.telegramChip}
+                                    /> :
+                                    <TelegramLoginButton
+                                        dataOnauth={handleTelegramResponse}
+                                        botName="checksho_bot"
+                                        buttonSize="medium"
+                                        className={styles.telegramButton}
+                                    />
+                                }
 
                                 <Button
                                     variant="contained"

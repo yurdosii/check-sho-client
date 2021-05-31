@@ -1,0 +1,32 @@
+.page {
+    display: flex;
+    flex-flow: column wrap;
+
+    width: 100vw;
+}
+
+.pageContent {
+    align-self: center;
+
+    width: 90vw;
+    margin-top: 3vmin;
+}
+
+.addCampaignButton {
+    margin-bottom: 1vmin !important;
+}
+
+.url {
+    text-decoration: underline;
+    color: #3939bb;
+}
+
+.campaigns {
+    display: flex;
+    flex-flow: column wrap;
+    flex-grow: 1;
+    align-self: center;
+
+    width: 80vw;
+    margin-bottom: 1.5vh;
+}
