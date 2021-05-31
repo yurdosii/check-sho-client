@@ -9,8 +9,6 @@ import axios from 'axios';
 import styles from '../styles/Auth.module.css'
 import { useRouter } from 'next/router'
 
-//TODO - validation password1 == password2
-
 function SignUp(props) {
     const router = useRouter();
 
@@ -61,7 +59,6 @@ function SignUp(props) {
                     rules={{
                         required: 'Field is required',
                         // maxLength: { value: 30, message: "Max length is 30" }
-                        // TODO - кастомний, username = 30, email_address = 254
                     }}
                     render={({ field, fieldState: { error } }) => {
                         return <TextField {...field}

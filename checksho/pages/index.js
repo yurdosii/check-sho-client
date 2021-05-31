@@ -332,7 +332,6 @@ function Campaigns(props) {
                     }}
                     actions={[
                         {
-                            // TODO - this
                             icon: tableIcons.Run,
                             tooltip: 'Run campaign',
                             onClick: (event, rowData) => {

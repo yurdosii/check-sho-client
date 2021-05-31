@@ -59,7 +59,6 @@ function SignIn(props) {
                     rules={{
                         required: 'Field is required',
                         // maxLength: { value: 30, message: "Max length is 30" }
-                        // TODO - кастомний, username = 30, email_address = 254
                     }}
                     render={({ field, fieldState: { error } }) => {
                         return <TextField {...field}
